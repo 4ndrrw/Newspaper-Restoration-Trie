@@ -118,7 +118,6 @@ class Application:
   def text_restore_menu(self):
     # Menu for text prediction/restoration
     while True:
-      self.display_header()
       self._print_text_restore_instructions()
       command = input("\n> ").strip()
       if not command:
