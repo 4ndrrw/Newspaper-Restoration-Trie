@@ -11,14 +11,9 @@ class Application:
     self.current_trie_file = None
     self.running = True
   
-  def clear_screen(self):
-    # Clear the terminal screen for better UI
-    os.system('cls' if os.name == 'nt' else 'clear')
-  
   def display_header(self):
     # Display the application header/banner
-    self.clear_screen()
-    print("*****************************************************************")
+    print("\n*****************************************************************")
     print("* ST1507 DSAA: Predictive Text Editor (Using Tries)             *")
     print("*---------------------------------------------------------------*")
     print("*                                                               *")
@@ -29,7 +24,6 @@ class Application:
 
   def display_main_menu(self):
     # Show the main menu options
-    self.display_header()
     print("\n\nPlease select your choice ('1', '2', '3', '4', '5', '6', '7'):")
     print("    1. Construct/Edit Trie")
     print("    2. Predict/Restore Text")
@@ -45,7 +39,6 @@ class Application:
   def trie_edit_menu(self):
     # Menu for constructing and editing the trie
     while True:
-      self.display_header()
       self._print_trie_edit_instructions()
       command = input("\n> ").strip()
       if not command:
@@ -57,16 +50,20 @@ class Application:
       input("\nPress Enter to continue...")
 
   def _print_trie_edit_instructions(self):
-    print("\nConstruct/Edit Trie Commands:")
-    print("'+word' - Add a keyword")
-    print("-word' - Delete a keyword")
-    print("?word' - Find a keyword")
-    print("# - Display Trie")
-    print("@ - Write Trie to file")
-    print("~ - Read keywords from file")
-    print("= - Write keywords to file")
-    print("! - Print instructions")
-    print("\\ - Exit to main menu")
+    print("\n---------------------------------------------------------------")
+    print("Construct/Edit Trie Commands:")
+    print("    '+', '-', '?', '#', '@', '~', '=', '!', '\\'")
+    print("---------------------------------------------------------------")
+    print("    +sunshine            (Add a keyword)")
+    print("    -moonlight           (Delete a keyword)")
+    print("    ?rainbow             (Find a keyword)")
+    print("    #                    (Display Trie)")
+    print("    @                    (Write Trie to file)")
+    print("    ~                    (Read keywords from file to make Trie)")
+    print("    =                    (Write keywords from Trie to file)")
+    print("    !                    (Print instructions)")
+    print("    \\                    (Exit)")
+    print("---------------------------------------------------------------")
 
   def _handle_trie_edit_command(self, cmd, arg):
     command_methods = {
@@ -131,15 +128,19 @@ class Application:
       input("\nPress Enter to continue...")
 
   def _print_text_restore_instructions(self):
-    print("\nPredict/Restore Text Commands:")
-    print("~ - Load keywords from file")
-    print("# - Display Trie")
-    print("$pattern - List matching keywords")
-    print("?pattern - Restore word (best match)")
-    print("& - Restore text (all matches)")
-    print("@ - Restore text (best matches)")
-    print("! - Print instructions")
-    print("\\ - Exit to main menu")
+    print("\n---------------------------------------------------------------")
+    print("Predict/Restore Text Commands:")
+    print("    '~', '#', '$', '?', '&', '@', '!', '\\'")
+    print("---------------------------------------------------------------")
+    print("    ~            (Read keywords from file to make Trie)")
+    print("    #            (Display Trie)")
+    print("    $ra*nb*w     (List all possible matching keywords)")
+    print("    ?ra*nb*w     (Restore a word using best keyword match)")
+    print("    &            (Restore a text using all matching keywords)")
+    print("    @            (Restore a text using best keyword matches)")
+    print("    !            (Print instructions)")
+    print("    \\            (Exit)")
+    print("---------------------------------------------------------------")
 
   def _handle_text_restore_command(self, command):
     cmd = command[0]
@@ -222,6 +223,7 @@ class Application:
   
   def run(self):
     # Main application loop
+    self.display_header()
     while self.running:
       self.display_main_menu()
       choice = input("Enter choice: ").strip()
