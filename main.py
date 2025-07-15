@@ -18,27 +18,30 @@ class Application:
   def display_header(self):
     # Display the application header/banner
     self.clear_screen()
-    print("***************************************************************")
-    print("* ST1507 DSAA: Predictive Text Editor (Using Tries)           *")
-    print("*-------------------------------------------------------------*")
-    print("*                                                             *")
-    print("* - Done by: Andrew Pang (2423708) & Nyi Nyi Zaw (2423472)    *")
-    print("* - Class DAAA/2A/04                                          *")
-    print("*                                                             *")
-    print("***************************************************************")
-  
+    print("*****************************************************************")
+    print("* ST1507 DSAA: Predictive Text Editor (Using Tries)             *")
+    print("*---------------------------------------------------------------*")
+    print("*                                                               *")
+    print("* - Done by: Andrew Pang (2423708) & Nyi Nyi Zaw (2423472)      *")
+    print("* - Class DAAA/2A/04                                            *")
+    print("*                                                               *")
+    print("*****************************************************************")
+
   def display_main_menu(self):
     # Show the main menu options
     self.display_header()
-    print("\nMain Menu\n")
-    print("1. Construct/Edit Trie")
-    print("2. Predict/Restore Text")
-    print("3. Extra Feature One")
-    print("4. Extra Feature Two")
-    print("5. Extra Feature Three")
-    print("6. Extra Feature Four")
-    print("7. Exit")
-  
+    print("\n\nPlease select your choice ('1', '2', '3', '4', '5', '6', '7'):")
+    print("    1. Construct/Edit Trie")
+    print("    2. Predict/Restore Text")
+    print("    -----------------------------------------------------------")
+    print("    3. Extra Feature One (Andrew Pang)")
+    print("    4. Extra Feature Two (Andrew Pang)")
+    print("    -----------------------------------------------------------")
+    print("    5. Extra Feature One (Nyi Nyi Zaw)")
+    print("    6. Extra Feature Two (Nyi Nyi Zaw)")
+    print("    -----------------------------------------------------------")
+    print("    7. Exit")
+
   def trie_edit_menu(self):
     # Menu for constructing and editing the trie
     while True:
@@ -221,7 +224,7 @@ class Application:
     # Main application loop
     while self.running:
       self.display_main_menu()
-      choice = input("\nEnter choice: ").strip()
+      choice = input("Enter choice: ").strip()
       
       if choice == '1':
         self.trie_edit_menu()
@@ -232,7 +235,6 @@ class Application:
         print("Exiting application. Goodbye!")
       else:
         print("Invalid choice. Please try again.")
-      input("\nPress Enter to continue...")
 
 if __name__ == "__main__":
   # Entry point for the application
