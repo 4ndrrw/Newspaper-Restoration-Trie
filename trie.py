@@ -107,8 +107,9 @@ class PrefixTrie:
       node = self.root
       
     marker = "└── " if last else "├── "
-    print(prefix + marker + ("*" if node.is_end else "") + 
-        f" (freq: {node.frequency})" if node.is_end else "")
+    end_marker = "*" if node.is_end else ""
+    freq_str = f" (freq: {node.frequency})" if node.is_end else ""
+    print(prefix + marker + end_marker + freq_str)
     
     prefix += "    " if last else "│   "
     children = list(node.children.items())
