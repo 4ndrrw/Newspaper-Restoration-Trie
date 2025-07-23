@@ -1,243 +1,227 @@
 import os
-import sys
-from trie import PrefixTrie
-from text_restorer import TextRestorer
+import re
+from processors.trie_processor import TrieProcessor
+from processors.text_processor import TextProcessor
+from helpers.file_io import FileIO
 
 class Application:
-  def __init__(self):
-    # Initialize the trie and text restorer
-    self.trie = PrefixTrie()
-    self.restorer = TextRestorer(self.trie)
-    self.current_trie_file = None
-    self.running = True
-  
-  def display_header(self):
-    # Display the application header/banner
-    print("\n*****************************************************************")
-    print("* ST1507 DSAA: Predictive Text Editor (Using Tries)             *")
-    print("*---------------------------------------------------------------*")
-    print("*                                                               *")
-    print("* - Done by: Andrew Pang (2423708) & Nyi Nyi Zaw (2423472)      *")
-    print("* - Class DAAA/2A/04                                            *")
-    print("*                                                               *")
-    print("*****************************************************************")
-
-  def display_main_menu(self):
-    # Show the main menu options
-    print("\n\nPlease select your choice ('1', '2', '3', '4', '5', '6', '7'):")
-    print("    1. Construct/Edit Trie")
-    print("    2. Predict/Restore Text")
-    print("    -----------------------------------------------------------")
-    print("    3. Extra Feature One (Andrew Pang)")
-    print("    4. Extra Feature Two (Andrew Pang)")
-    print("    -----------------------------------------------------------")
-    print("    5. Extra Feature One (Nyi Nyi Zaw)")
-    print("    6. Extra Feature Two (Nyi Nyi Zaw)")
-    print("    -----------------------------------------------------------")
-    print("    7. Exit")
-
-  def trie_edit_menu(self):
-    # Menu for constructing and editing the trie
-    while True:
-      self._print_trie_edit_instructions()
-      command = input("\n> ").strip()
-      if not command:
-        continue
-      cmd = command[0]
-      arg = command[1:].strip()
-      if self._handle_trie_edit_command(cmd, arg):
-        return
-      input("\nPress Enter to continue...")
-
-  def _print_trie_edit_instructions(self):
-    print("\n---------------------------------------------------------------")
-    print("Construct/Edit Trie Commands:")
-    print("    '+', '-', '?', '#', '@', '~', '=', '!', '\\'")
-    print("---------------------------------------------------------------")
-    print("    +sunshine            (Add a keyword)")
-    print("    -moonlight           (Delete a keyword)")
-    print("    ?rainbow             (Find a keyword)")
-    print("    #                    (Display Trie)")
-    print("    @                    (Write Trie to file)")
-    print("    ~                    (Read keywords from file to make Trie)")
-    print("    =                    (Write keywords from Trie to file)")
-    print("    !                    (Print instructions)")
-    print("    \\                    (Exit)")
-    print("---------------------------------------------------------------")
-
-  def _handle_trie_edit_command(self, cmd, arg):
-    command_methods = {
-      '+': self._cmd_add_word,
-      '-': self._cmd_delete_word,
-      '?': self._cmd_find_word,
-      '#': self._cmd_display_trie,
-      '@': self._save_trie_to_file,
-      '~': self._load_keywords_from_file,
-      '=': self._export_keywords_to_file,
-      '!': self._cmd_print_instructions,
-      '\\': self._cmd_exit_menu
-    }
-    if cmd in command_methods:
-      return command_methods[cmd](arg)
-    else:
-      print("Invalid command")
-      return False
-
-  def _cmd_add_word(self, arg):
-    self.trie.insert(arg.lower())
-    print(f"Added '{arg}' to trie")
-    return False
-
-  def _cmd_delete_word(self, arg):
-    if self.trie.delete(arg.lower()):
-      print(f"Deleted '{arg}' from trie")
-    else:
-      print(f"'{arg}' not found in trie")
-    return False
-
-  def _cmd_find_word(self, arg):
-    if self.trie.search(arg.lower()):
-      print(f"'{arg}' is present in trie")
-    else:
-      print(f"'{arg}' is not present in trie")
-    return False
-
-  def _cmd_display_trie(self, arg):
-    print("\nTrie Structure:")
-    self.trie.visualize()
-    return False
-
-  def _cmd_print_instructions(self, arg):
-    # Print instructions (just redisplay)
-    return False
-
-  def _cmd_exit_menu(self, arg):
-    # Exit to main menu
-    return True
-  
-  def text_restore_menu(self):
-    # Menu for text prediction/restoration
-    while True:
-      self._print_text_restore_instructions()
-      command = input("\n> ").strip()
-      if not command:
-        continue
-      if self._handle_text_restore_command(command):
-        return
-      input("\nPress Enter to continue...")
-
-  def _print_text_restore_instructions(self):
-    print("\n---------------------------------------------------------------")
-    print("Predict/Restore Text Commands:")
-    print("    '~', '#', '$', '?', '&', '@', '!', '\\'")
-    print("---------------------------------------------------------------")
-    print("    ~            (Read keywords from file to make Trie)")
-    print("    #            (Display Trie)")
-    print("    $ra*nb*w     (List all possible matching keywords)")
-    print("    ?ra*nb*w     (Restore a word using best keyword match)")
-    print("    &            (Restore a text using all matching keywords)")
-    print("    @            (Restore a text using best keyword matches)")
-    print("    !            (Print instructions)")
-    print("    \\            (Exit)")
-    print("---------------------------------------------------------------")
-
-  def _handle_text_restore_command(self, command):
-    cmd = command[0]
-    arg = command[1:].strip()
-    if cmd == '~':
-      self._load_keywords_from_file()
-    elif cmd == '#':
-      print("\nTrie Structure:")
-      self.trie.visualize()
-    elif cmd == '$':
-      matches = self.trie.find_matches(arg.lower())
-      if matches:
-        print("\nMatching words:")
-        for word, freq in matches:
-          print(f"- {word} (frequency: {freq})")
-      else:
-        print("No matches found")
-    elif cmd == '?':
-      restored = self.restorer.restore_word(arg, 'best')
-      print(f"\nRestored word: {restored}")
-    elif cmd == '&':
-      self._restore_text_file('all')
-    elif cmd == '@':
-      self._restore_text_file('best')
-    elif cmd == '!':
-      # Print instructions (just redisplay)
-      pass
-    elif cmd == '\\':
-      return True
-    else:
-      print("Invalid command")
-    return False
-  
-  def _load_keywords_from_file(self):
-    # Load keywords from a file and insert into trie
-    filename = input("Enter filename to load: ").strip()
-    try:
-      with open(filename, 'r') as f:
-        for line in f:
-          word = line.strip()
-          if word:
-            self.trie.insert(word.lower())
-      print(f"Loaded keywords from {filename}")
-      self.current_trie_file = filename
-    except Exception as e:
-      print(f"Error loading file: {e}")
-  
-  def _export_keywords_to_file(self):
-    # Export all keywords and their frequencies to a file
-    filename = input("Enter output filename: ").strip()
-    try:
-      with open(filename, 'w') as f:
-        for word, freq in self.trie.get_all_words():
-          f.write(f"{word},{freq}\n")
-      print(f"Exported {self.trie.total_words} keywords to {filename}")
-    except Exception as e:
-      print(f"Error exporting file: {e}")
-  
-  def _save_trie_to_file(self):
-    # Implement serialization of the trie structure
-    pass
-  
-  def _restore_text_file(self, mode):
-    # Restore text from a file using the trie and save output
-    input_file = input("Enter input text file: ").strip()
-    output_file = input("Enter output file: ").strip()
+    def __init__(self):
+        """Initialize application components"""
+        self.trie_processor = TrieProcessor()
+        self.text_processor = TextProcessor(self.trie_processor)
+        self.file_io = FileIO()
+        self.running = True
     
-    try:
-      with open(input_file, 'r') as f:
-        content = f.read()
-      
-      restored = self.restorer.restore_text(content, mode)
-      
-      with open(output_file, 'w') as f:
-        f.write(restored)
-      
-      print(f"Text restored using {mode} matches and saved to {output_file}")
-    except Exception as e:
-      print(f"Error processing files: {e}")
-  
-  def run(self):
-    # Main application loop
-    self.display_header()
-    while self.running:
-      self.display_main_menu()
-      choice = input("Enter choice: ").strip()
-      
-      if choice == '1':
-        self.trie_edit_menu()
-      elif choice == '2':
-        self.text_restore_menu()
-      elif choice == '7':
-        self.running = False
-        print("Exiting application. Goodbye!")
-      else:
-        print("Invalid choice. Please try again.")
+    def display_header(self):
+        """Display application header"""
+        print("\n*****************************************************************")
+        print("* ST1507 DSAA: Predictive Text Editor (Using Tries)             *")
+        print("*---------------------------------------------------------------*")
+        print("*                                                               *")
+        print("* - Done by: Andrew Pang (2423708) & Nyi Nyi Zaw (2423472)      *")
+        print("* - Class DAAA/2A/04                                            *")
+        print("*                                                               *")
+        print("*****************************************************************")
+
+    def display_main_menu(self):
+        """Display main menu options"""
+        print("\n\nPlease select your choice ('1', '2', '3', '4', '5', '6', '7'):")
+        print("    1. Construct/Edit Trie")
+        print("    2. Predict/Restore Text")
+        print("    -----------------------------------------------------------")
+        print("    3. Extra Feature One (Andrew Pang)")
+        print("    4. Extra Feature Two (Andrew Pang)")
+        print("    -----------------------------------------------------------")
+        print("    5. Extra Feature One (Nyi Nyi Zaw)")
+        print("    6. Extra Feature Two (Nyi Nyi Zaw)")
+        print("    -----------------------------------------------------------")
+        print("    7. Exit")
+
+    def trie_edit_menu(self):
+        """Handle trie construction/edit menu"""
+        while True:
+            self._print_trie_edit_instructions()
+            
+            try:
+                command = input("\n> ").strip()
+                if not command:
+                    continue
+
+                if self._handle_trie_edit_command(command):
+                    return
+
+            except KeyboardInterrupt:
+                print("\nOperation cancelled.")
+            except Exception as e:
+                print(f"\nError: {str(e)}")
+            
+            input("\nPress Enter to continue...")
+
+    def _print_trie_edit_instructions(self):
+        """Print trie edit command instructions"""
+        print("\n---------------------------------------------------------------")
+        print("Construct/Edit Trie Commands:")
+        print("    '+', '-', '?', '#', '@', '~', '=', '!', '\\'")
+        print("---------------------------------------------------------------")
+        print("    +sunshine            (Add a keyword)")
+        print("    -moonlight           (Delete a keyword)")
+        print("    ?rainbow             (Find a keyword)")
+        print("    #                    (Display Trie)")
+        print("    @                    (Write Trie to file)")
+        print("    ~                    (Read keywords from file to make Trie)")
+        print("    =                    (Write keywords from Trie to file)")
+        print("    !                    (Print instructions)")
+        print("    \\                    (Exit)")
+        print("---------------------------------------------------------------")
+
+    def _handle_trie_edit_command(self, command):
+        """Process trie edit commands"""
+        cmd = command[0]
+        arg = command[1:].strip()
+
+        commands = {
+            '+': lambda: print(self.trie_processor.add_word(arg)),
+            '-': lambda: print(self.trie_processor.delete_word(arg)),
+            '?': lambda: print(
+                f"'{arg}' is present in trie" if self.trie_processor.search_word(arg) 
+                else f"'{arg}' is not present in trie"
+            ),
+            '#': lambda: print("\nTrie Structure:\n", self.trie_processor.display_trie()),
+            '@': self._save_trie_to_file,
+            '~': self._load_keywords_from_file,
+            '=': self._export_keywords_to_file,
+            '!': lambda: None,
+            '\\': lambda: True
+        }
+
+        handler = commands.get(cmd, lambda: print("Invalid command"))
+        return handler()
+
+    def text_restore_menu(self):
+        """Handle text prediction/restoration menu"""
+        while True:
+            self._print_text_restore_instructions()
+            
+            try:
+                command = input("\n> ").strip()
+                if not command:
+                    continue
+
+                if self._handle_text_restore_command(command):
+                    return
+
+            except KeyboardInterrupt:
+                print("\nOperation cancelled.")
+            except Exception as e:
+                print(f"\nError: {str(e)}")
+            
+            input("\nPress Enter to continue...")
+
+    def _print_text_restore_instructions(self):
+        """Print text restore command instructions"""
+        print("\n---------------------------------------------------------------")
+        print("Predict/Restore Text Commands:")
+        print("    '~', '#', '$', '?', '&', '@', '!', '\\'")
+        print("---------------------------------------------------------------")
+        print("    ~            (Read keywords from file to make Trie)")
+        print("    #            (Display Trie)")
+        print("    $ra*nb*w     (List all possible matching keywords)")
+        print("    ?ra*nb*w     (Restore a word using best keyword match)")
+        print("    &            (Restore a text using all matching keywords)")
+        print("    @            (Restore a text using best keyword matches)")
+        print("    !            (Print instructions)")
+        print("    \\            (Exit)")
+        print("---------------------------------------------------------------")
+
+    def _handle_text_restore_command(self, command):
+        """Process text restore commands"""
+        cmd = command[0]
+        arg = command[1:].strip()
+
+        commands = {
+            '~': self._load_keywords_from_file,
+            '#': lambda: print("\nTrie Structure:\n", self.trie_processor.display_trie()),
+            '$': lambda: self._show_matches(arg),
+            '?': lambda: print(f"\nRestored word: {self.text_processor.restore_word(arg, 'best')}"),
+            '&': lambda: self._process_text_file('all'),
+            '@': lambda: self._process_text_file('best'),
+            '!': lambda: None,
+            '\\': lambda: True
+        }
+
+        handler = commands.get(cmd, lambda: print("Invalid command"))
+        return handler()
+
+    def _load_keywords_from_file(self):
+        """Load keywords from file into trie"""
+        filename = input("Enter filename to load: ").strip()
+        result = self.file_io.load_keywords(filename, self.trie_processor)
+        print(result)
+
+    def _export_keywords_to_file(self):
+        """Export trie keywords to file"""
+        filename = input("Enter output filename: ").strip()
+        words = self.trie_processor.get_all_words()
+        result = self.file_io.export_keywords(filename, words)
+        print(result)
+
+    def _save_trie_to_file(self):
+        """Serialize trie to file"""
+        filename = input("Enter filename to save trie: ").strip()
+        result = self.file_io.save_trie(filename, self.trie_processor)
+        print(result)
+
+    def _show_matches(self, pattern):
+        """Display all matching keywords for pattern"""
+        matches = self.trie_processor.find_matches(pattern)
+        if matches:
+            print("\nMatching words:")
+            for word, freq in matches:
+                print(f"- {word} (frequency: {freq})")
+        else:
+            print("No matches found")
+
+    def _process_text_file(self, mode):
+        """Process text file restoration"""
+        input_file = input("Enter input text file: ").strip()
+        output_file = input("Enter output file: ").strip()
+        
+        try:
+            with open(input_file, 'r') as f:
+                content = f.read()
+            
+            restored = self.text_processor.restore_text(content, mode)
+            result = self.file_io.restore_text_file(output_file, restored)
+            print(result)
+        except Exception as e:
+            print(f"Error processing files: {e}")
+
+    def run(self):
+        """Main application loop"""
+        self.display_header()
+        
+        while self.running:
+            try:
+                self.display_main_menu()
+                choice = input("\nEnter choice: ").strip()
+                
+                if choice == '1':
+                    self.trie_edit_menu()
+                elif choice == '2':
+                    self.text_restore_menu()
+                elif choice == '7':
+                    self.running = False
+                    print("\nExiting application. Goodbye!")
+                else:
+                    print("\nInvalid choice. Please try again.")
+                    input("Press Enter to continue...")
+                    
+            except KeyboardInterrupt:
+                print("\nOperation cancelled.")
+            except Exception as e:
+                print(f"\nError: {str(e)}")
+                input("Press Enter to continue...")
 
 if __name__ == "__main__":
-  # Entry point for the application
-  app = Application()
-  app.run()
+    app = Application()
+    app.run()
