@@ -48,7 +48,7 @@ class PrefixTrie:
         return False
       nodes.append((node, char))
       node = node.children[char]
-    
+  
     if not node.is_end:
       return False
       
@@ -101,21 +101,34 @@ class PrefixTrie:
       # Match specific character
       self._dfs_pattern_search(node.children[char], pattern, index+1, current+char, matches)
 
-  def visualize(self, node=None, prefix="", last=True):
-    # Print a visual representation of the trie structure
+  def visualize(self, node=None, prefix=""):
+    # Print a visual representation of the trie structure in bracket format
     if node is None:
       node = self.root
+      print("[")
+      self._print_trie_recursive(node, "", 1)
+      print("]")
+    else:
+      self._print_trie_recursive(node, prefix, 1)
+  
+  def _print_trie_recursive(self, node, prefix, depth):
+    # Recursive helper for printing trie structure
+    for char, child in node.children.items():
+      new_prefix = prefix + char
+      indent = ". " * depth
       
-    marker = "└── " if last else "├── "
-    end_marker = "*" if node.is_end else ""
-    freq_str = f" (freq: {node.frequency})" if node.is_end else ""
-    print(prefix + marker + end_marker + freq_str)
-    
-    prefix += "    " if last else "│   "
-    children = list(node.children.items())
-    
-    for i, (char, child) in enumerate(children):
-      last_child = i == len(children) - 1
-      print(prefix + "│")
-      print(prefix + "└── " + char + " → ", end="")
-      self.visualize(child, prefix, last_child)
+      if child.is_end and len(child.children) == 0:
+        # If this is a complete word with no children, show it with the > marker
+        print(f"{indent}>{new_prefix}({child.frequency})*")
+      else:
+        # If it has children, show it as a bracket (even if it's also a complete word)
+        if child.is_end:
+          print(f"{indent}[{new_prefix}({child.frequency})*")
+        else:
+          print(f"{indent}[{new_prefix}")
+        
+        # Recursively print children
+        self._print_trie_recursive(child, new_prefix, depth + 1)
+        
+        # Close bracket
+        print(f"{indent}]")
