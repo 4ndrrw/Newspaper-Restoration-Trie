@@ -16,7 +16,7 @@ class Application:
   def display_header(self):
     """Display application header"""
     print("\n*****************************************************************")
-    print("* ST1507 DSAA: Predictive Text Editor (Using Tries)             *")
+    print("* ST1507 DSAA: Predictive Text Editor (Using tries)             *")
     print("*---------------------------------------------------------------*")
     print("*                                                               *")
     print("* - Done by: Andrew Pang (2423708) & Nyi Nyi Zaw (2423472)      *")
@@ -45,7 +45,7 @@ class Application:
     
     while True:
       try:
-        command = input("\n> ").strip()
+        command = input("\n>").strip()
         if not command:
           continue
 
@@ -63,7 +63,7 @@ class Application:
     """Print trie edit command instructions"""
     print("\n---------------------------------------------------------------")
     print("Construct/Edit Trie Commands:")
-    print("    '+', '-', '?', '#', '@', '~', '=', '!', '\\'")
+    print("    '+','-','?','#','@','~','=','!','\\'")
     print("---------------------------------------------------------------")
     print("    +sunshine        (Add a keyword)")
     print("    -moonlight       (Delete a keyword)")
@@ -103,6 +103,7 @@ class Application:
   def _exit_trie_edit_menu(self):
     """Exit trie edit menu with goodbye message"""
     print("Exiting the Edit Command Prompt. Bye...")
+    input("\nPress enter key, to continue....")
     return True
 
   def text_restore_menu(self):
@@ -112,7 +113,7 @@ class Application:
     
     while True:
       try:
-        command = input("\n> ").strip()
+        command = input("\n>").strip()
         if not command:
           continue
 
@@ -130,7 +131,7 @@ class Application:
     """Print text restore command instructions"""
     print("\n---------------------------------------------------------------")
     print("Predict/Restore Text Commands:")
-    print("  '~', '#', '$', '?', '&', '@', '!', '\\'")
+    print("    '~','#','$','?','&','@','!','\\'")
     print("---------------------------------------------------------------")
     print("  ~          (Read keywords from file to make Trie)")
     print("  #          (Display Trie)")
@@ -152,11 +153,11 @@ class Application:
       '~': self._load_keywords_from_file,
       '#': lambda: self.trie_processor.display_trie(),
       '$': lambda: self._show_matches(arg),
-      '?': lambda: print(f"\nRestored word: {self.text_processor.restore_word(arg, 'best')}"),
+      '?': lambda: print(f"Restored keyword: '{self.text_processor.restore_word(arg, 'best')}'"),
       '&': lambda: self._process_text_file('all'),
       '@': lambda: self._process_text_file('best'),
       '!': self._print_text_restore_instructions,
-      '\\': lambda: True
+      '\\': lambda: self._exit_trie_edit_menu()
     }
 
     handler = commands.get(cmd, lambda: print("Invalid command"))
@@ -164,20 +165,20 @@ class Application:
 
   def _load_keywords_from_file(self):
     """Load keywords from file into trie"""
-    filename = input("Enter filename to load: ").strip()
+    filename = input("Please enter input file: ").strip()
     result = self.file_io.load_keywords(filename, self.trie_processor)
     print(result)
 
   def _export_keywords_to_file(self):
     """Export trie keywords to file"""
-    filename = input("Enter output filename: ").strip()
+    filename = input("Please enter output file: ").strip()
     words = self.trie_processor.get_all_words()
     result = self.file_io.export_keywords(filename, words)
     print(result)
 
   def _save_trie_to_file(self):
     """Serialize trie to file"""
-    filename = input("Enter filename to save trie: ").strip()
+    filename = input("Please enter new filename: ").strip()
     result = self.file_io.save_trie(filename, self.trie_processor)
     print(result)
 
@@ -185,16 +186,15 @@ class Application:
     """Display all matching keywords for pattern"""
     matches = self.trie_processor.find_matches(pattern)
     if matches:
-      print("\nMatching words:")
-      for word, freq in matches:
-        print(f"- {word} (frequency: {freq})")
+        formatted = [f"[{word},{freq}]" for word, freq in matches]
+        print(",".join(formatted))
     else:
-      print("No matches found")
+        print()  
 
   def _process_text_file(self, mode):
     """Process text file restoration"""
-    input_file = input("Enter input text file: ").strip()
-    output_file = input("Enter output file: ").strip()
+    input_file = input("Please enter input file: ").strip()
+    output_file = input("Please enter output file: ").strip()
     
     try:
       # Read input file

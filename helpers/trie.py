@@ -1,3 +1,5 @@
+import random
+
 class TrieNode:
   def __init__(self):
     # Each node has a dictionary of children, a flag for end of word,
@@ -13,17 +15,17 @@ class PrefixTrie:
     self.root = TrieNode()
     self.total_words = 0
 
-  def insert(self, word):
+  def insert(self, word, count=1):
     # Insert a word into the trie, updating prefix counts and frequency
     node = self.root
     for char in word:
       if char not in node.children:
         node.children[char] = TrieNode()
       node = node.children[char]
-      node.prefix_count += 1
+      node.prefix_count += count
     node.is_end = True
-    node.frequency += 1
-    self.total_words += 1
+    node.frequency += count
+    self.total_words += count
 
   def search(self, word):
     # Check if a word exists in the trie
@@ -82,8 +84,25 @@ class PrefixTrie:
     # Find all words matching a pattern (supports '*' as wildcard)
     matches = []
     self._dfs_pattern_search(self.root, pattern, 0, "", matches)
-    # Sort by frequency descending, then alphabetically
-    return sorted(matches, key=lambda x: (-x[1], x[0]))
+
+    if not matches:
+        return []
+
+    # Sort all matches by frequency descending, then alphabetically
+    matches.sort(key=lambda x: (-x[1], x[0]))
+
+    # Get max frequency *after sorting*
+    max_freq = matches[0][1]
+
+    # Split into top matches (same freq) and others
+    top_matches = [pair for pair in matches if pair[1] == max_freq]
+    other_matches = [pair for pair in matches if pair[1] < max_freq]
+
+    # Shuffle only top matches to vary order
+    random.shuffle(top_matches)
+
+    # Return combined list
+    return top_matches + other_matches
 
   def _dfs_pattern_search(self, node, pattern, index, current, matches):
     # Helper for DFS pattern search with wildcard support
@@ -115,7 +134,7 @@ class PrefixTrie:
     # Recursive helper for printing trie structure
     for char, child in node.children.items():
       new_prefix = prefix + char
-      indent = ". " * depth
+      indent = "." * depth
       
       if child.is_end and len(child.children) == 0:
         # If this is a complete word with no children, show it with the > marker

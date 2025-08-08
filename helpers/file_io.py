@@ -14,35 +14,37 @@ class FileIO:
       str: Status message indicating success or error.
     """
     try:
-      # Clear the existing trie before loading new keywords
-      trie_processor.clear_trie()
-      
-      with open(filename, 'r') as f:
-        for line in f:
-          line = line.strip()
-          if line:
-            # Check if line contains CSV format (word,frequency)
-            if ',' in line:
-              parts = line.split(',')
-              if len(parts) == 2:
-                word = parts[0].strip()
-                try:
-                  frequency = int(parts[1].strip())
-                  # Add the word multiple times according to its frequency
-                  for _ in range(frequency):
-                    trie_processor.add_word(word)
-                except ValueError:
-                  # If frequency is not a valid integer, treat whole line as word
-                  trie_processor.add_word(line)
-              else:
-                # If not valid CSV format, treat whole line as word
-                trie_processor.add_word(line)
-            else:
-              # Plain text format, just add the word
-              trie_processor.add_word(line)
-      return f"Loaded keywords from {filename}"
+        # Clear the existing trie before loading new keywords
+        trie_processor.clear_trie()
+
+        with open(filename, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+
+                # Check if line contains CSV format (word,frequency)
+                if ',' in line:
+                    parts = line.split(',')
+                    if len(parts) == 2:
+                        word = parts[0].strip()
+                        try:
+                            frequency = int(parts[1].strip())
+                            # Add the word once with its frequency value
+                            trie_processor.add_word(word, frequency)
+                        except ValueError:
+                            # If frequency is invalid, treat the whole line as a word
+                            trie_processor.add_word(line)
+                    else:
+                        # If not valid CSV format, treat whole line as word
+                        trie_processor.add_word(line)
+                else:
+                    # Plain text format, just add the word
+                    trie_processor.add_word(line)
+
+        return f"Loaded keywords from {filename}"
     except Exception as e:
-      return f"Error loading file: {e}"
+        return f"Error loading file: {e}"
 
   @staticmethod
   def export_keywords(filename, words):

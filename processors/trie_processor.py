@@ -6,9 +6,9 @@ class TrieProcessor:
     self.trie = PrefixTrie()
     self.current_trie_file = None
 
-  def add_word(self, word):
+  def add_word(self, word, count=1):
     # Insert a word (converted to lowercase) into the trie
-    self.trie.insert(word.lower())
+    self.trie.insert(word.lower(), count)
     return f"Added '{word}' to trie"
 
   def delete_word(self, word):
