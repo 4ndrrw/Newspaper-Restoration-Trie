@@ -1,5 +1,5 @@
 import re
-from processors.strategies import BestMatchStrategy, AllMatchesStrategy
+from processors.strategies import BestMatchStrategy, AllMatchesStrategy, ContextBestStrategy
 from processors.base_processor import BaseProcessor
 
 class TextProcessor(BaseProcessor):
@@ -54,3 +54,58 @@ class TextProcessor(BaseProcessor):
       else:
         restored_text += token
     return restored_text
+  
+  def restore_text_with_context(self, text, lm, threshold=0.6):
+    """
+    Restore a text using the ContextBestStrategy with a language model.
+    Produces:
+      - restored text (best choices wrapped in <...>)
+      - a list of review rows for CSV: [(original, choice, confidence, left, right, candidates_csv), ...]
+    """
+    tokens = re.findall(r"[a-zA-Z0-9*']+|[^\w\s]|\n", text)
+    restored_tokens = []
+    review_rows = []
+    ctx_strategy = ContextBestStrategy()
+
+    def prev_word(idx):
+      j = idx - 1
+      while j >= 0:
+        if re.match(r"[A-Za-z0-9']+$", tokens[j]):
+          return tokens[j].lower()
+        elif tokens[j] == '\n':
+          return '<s>'
+        j -= 1
+      return '<s>'
+
+    def next_word(idx):
+      j = idx + 1
+      while j < len(tokens):
+        if re.match(r"[A-Za-z0-9']+$", tokens[j]):
+          return tokens[j].lower()
+        elif tokens[j] == '\n':
+          return '</s>'
+        j += 1
+      return None
+
+    for i, token in enumerate(tokens):
+      if '*' in token:
+        left = prev_word(i)
+        right = next_word(i)
+        choice, conf = ctx_strategy.restore(token, self.trie, lm=lm, left_word=left, right_word=right)
+        restored_tokens.append(f"<{choice}>")
+        matches = self.trie.find_matches(token)
+        alts = [w for w, _ in matches]
+        review_rows.append((token, choice, f"{conf:.3f}", left, (right or ''), ",".join(alts)))
+      else:
+        restored_tokens.append(token)
+
+    out = ''
+    for i, token in enumerate(restored_tokens):
+      if token == '\n':
+        out += token
+      elif i > 0 and restored_tokens[i - 1] != '\n' and not re.match(r"[.,!?;:\)\]\}]", token):
+        out += ' ' + token
+      else:
+        out += token
+
+    return out, review_rows
