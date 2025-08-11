@@ -2,6 +2,15 @@ from helpers.trie import PrefixTrie
 from processors.base_processor import BaseProcessor
 
 class TrieProcessor(BaseProcessor):
+
+  def get_random_word(self):
+    """Return a random word from the trie, or None if empty"""
+    words = self.get_all_words()
+    if not words:
+      return None
+    import random
+    return random.choice(words)[0]
+  
   def __init__(self):
     # Initialize a new PrefixTrie instance and set current_trie_file to None
     super().__init__()
