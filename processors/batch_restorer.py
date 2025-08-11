@@ -1,6 +1,26 @@
 import os
 
 class BatchRestorer:
+  @staticmethod
+  def prompt_run_batch_restore(batch_restorer):
+    folder = input("Enter folder path containing .txt files: ").strip()
+    mode = input("Restore mode ('best' or 'all') [default: best]: ").strip() or 'best'
+    output_dir = input("Enter output folder for restored files (leave blank to use input folder): ").strip()
+    try:
+      summary, total_restored, total_matches, total_unmatched, unmatched_tokens_per_file = batch_restorer.restore_folder(folder, mode, output_dir)
+      batch_restorer.print_summary(summary, total_restored, total_matches, total_unmatched, unmatched_tokens_per_file)
+    except Exception as e:
+      print(f"Batch restore failed: {e}")
+    input("\nPress Enter to continue...")
+
+  @staticmethod
+  def prompt_load_keywords(trie_processor):
+    from helpers.file_io import FileIO
+    FileIO.prompt_load_keywords(trie_processor)
+
+  @staticmethod
+  def prompt_display_trie(trie_processor):
+    trie_processor.display_trie()
   def __init__(self, text_processor, file_io):
     self.text_processor = text_processor
     self.file_io = file_io

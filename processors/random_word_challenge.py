@@ -34,9 +34,7 @@ class RandomWordChallenge:
 			words = [w for w, _ in self.trie_processor.get_all_words() if 7 <= len(w) <= 8]
 		else:
 			words = [w for w, _ in self.trie_processor.get_all_words() if len(w) >= 9]
-		if not words:
-			return None
-		return random.choice(words)
+		return random.choice(words) if words else None
 
 	def _mask_word(self, word, level):
 		n = len(word)

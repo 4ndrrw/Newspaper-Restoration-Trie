@@ -177,8 +177,10 @@ class Application:
     """Print batch restore command instructions"""
     print("\n---------------------------------------------------------------")
     print("Batch Restore with Summary Commands:")
-    print("    'r', '!', '\\'")
+    print("    '~', '#', 'r', '!', '\\'")
     print("---------------------------------------------------------------")
+    print("     ~      (Read keywords from file to make Trie)")
+    print("     #      (Display Trie)")
     print("     r      (Run batch restore on all .txt files in a folder)")
     print("     !      (Print instructions)")
     print("     \\      (Exit)")
@@ -194,29 +196,21 @@ class Application:
           continue
         if command == '!':
           self._print_batch_restore_instructions()
+        elif command == '~':
+          from processors.batch_restorer import BatchRestorer
+          BatchRestorer.prompt_load_keywords(self.trie_processor)
+        elif command == '#':
+          from processors.batch_restorer import BatchRestorer
+          BatchRestorer.prompt_display_trie(self.trie_processor)
         elif command == '\\':
           print("Exiting Batch Restore. Bye...")
           input("\nPress Enter to continue...")
           return
         elif command.lower() == 'r':
-          # Prompt for keywords file and load into trie
-          keywords_file = input("Enter keywords file to build trie: ").strip()
-          if not keywords_file:
-            print("No keywords file provided. Aborting batch restore.")
-            continue
-          result = self.file_io.load_keywords(keywords_file, self.trie_processor)
-          print(result)
-          folder = input("Enter folder path containing .txt files: ").strip()
-          mode = input("Restore mode ('best' or 'all') [default: best]: ").strip() or 'best'
-          output_dir = input("Enter output folder for restored files (leave blank to use input folder): ").strip()
-          try:
-            summary, total_restored, total_matches, total_unmatched, unmatched_tokens_per_file = self.batch_restorer.restore_folder(folder, mode, output_dir)
-            self.batch_restorer.print_summary(summary, total_restored, total_matches, total_unmatched, unmatched_tokens_per_file)
-          except Exception as e:
-            print(f"Batch restore failed: {e}")
-          input("\nPress Enter to continue...")
+          from processors.batch_restorer import BatchRestorer
+          BatchRestorer.prompt_run_batch_restore(self.batch_restorer)
         else:
-          print("Invalid command. Type '!' for instructions or 'r' to run batch restore.")
+          print("Invalid command. Type '!', '~', '#', or 'r' to run batch restore.")
       except KeyboardInterrupt:
         print("\nOperation cancelled.")
         return

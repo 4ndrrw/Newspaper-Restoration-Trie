@@ -24,8 +24,7 @@ class FileIO:
   @staticmethod
   def prompt_show_matches(trie_processor, pattern):
     """Display all matching keywords for pattern."""
-    matches = trie_processor.find_matches(pattern)
-    if matches:
+    if matches := trie_processor.find_matches(pattern):
       formatted = [f"[{word},{freq}]" for word, freq in matches]
       print(",".join(formatted))
     else:
