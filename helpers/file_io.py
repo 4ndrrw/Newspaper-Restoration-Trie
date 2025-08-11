@@ -1,5 +1,50 @@
 class FileIO:
   @staticmethod
+  def prompt_load_keywords(trie_processor):
+    """Prompt user for file and load keywords into trie."""
+    filename = input("Please enter input file: ").strip()
+    result = FileIO.load_keywords(filename, trie_processor)
+    print(result)
+
+  @staticmethod
+  def prompt_export_keywords(trie_processor):
+    """Prompt user for file and export trie keywords to file."""
+    filename = input("Please enter output file: ").strip()
+    words = trie_processor.get_all_words()
+    result = FileIO.export_keywords(filename, words)
+    print(result)
+
+  @staticmethod
+  def prompt_save_trie(trie_processor):
+    """Prompt user for file and serialize trie to file."""
+    filename = input("Please enter new filename: ").strip()
+    result = FileIO.save_trie(filename, trie_processor)
+    print(result)
+
+  @staticmethod
+  def prompt_show_matches(trie_processor, pattern):
+    """Display all matching keywords for pattern."""
+    matches = trie_processor.find_matches(pattern)
+    if matches:
+      formatted = [f"[{word},{freq}]" for word, freq in matches]
+      print(",".join(formatted))
+    else:
+      print()  # blank line
+
+  @staticmethod
+  def prompt_process_text_file(text_processor, file_io, mode):
+    """Prompt user for files and process text file restoration."""
+    input_file = input("Please enter input file: ").strip()
+    output_file = input("Please enter output file: ").strip()
+    try:
+      with open(input_file, 'r') as f:
+        content = f.read()
+      restored = text_processor.restore_text(content, mode)
+      result = file_io.restore_text_file(output_file, restored)
+      print(result)
+    except Exception as e:
+      print(f"Error processing files: {e}")
+  @staticmethod
   def load_keywords(filename, trie_processor):
     """
     Loads keywords from a file and adds them to the provided trie_processor.

@@ -66,7 +66,7 @@ class Application:
     """Print trie edit command instructions"""
     print("\n---------------------------------------------------------------")
     print("Construct/Edit Trie Commands:")
-    print("    '+','-','?','#','@','~','=','!','\\'")
+    print("    '+', '-', '?', '#', '@', '~', '=', '!', '\\'")
     print("---------------------------------------------------------------")
     print("    +sunshine        (Add a keyword)")
     print("    -moonlight       (Delete a keyword)")
@@ -93,9 +93,9 @@ class Application:
         else f"Keyword '{arg}' is not present in the trie"
       ),
       '#': lambda: self.trie_processor.display_trie(),
-      '@': self._save_trie_to_file,
-      '~': self._load_keywords_from_file,
-      '=': self._export_keywords_to_file,
+      '@': lambda: FileIO.prompt_save_trie(self.trie_processor),
+      '~': lambda: FileIO.prompt_load_keywords(self.trie_processor),
+      '=': lambda: FileIO.prompt_export_keywords(self.trie_processor),
       '!': self._print_trie_edit_instructions,
       '\\': lambda: self._exit_trie_edit_menu()
     }
@@ -132,7 +132,7 @@ class Application:
     """Print text restore command instructions"""
     print("\n---------------------------------------------------------------")
     print("Predict/Restore Text Commands:")
-    print("    '~','#','$','?','&','@','!','\\'")
+    print("    '~', '#', '$', '?', '&', '@', '!', '\\'")
     print("---------------------------------------------------------------")
     print("  ~          (Read keywords from file to make Trie)")
     print("  #          (Display Trie)")
@@ -151,12 +151,12 @@ class Application:
 
     # Map commands to their handlers
     commands = {
-      '~': self._load_keywords_from_file,
+      '~': lambda: FileIO.prompt_load_keywords(self.trie_processor),
       '#': lambda: self.trie_processor.display_trie(),
-      '$': lambda: self._show_matches(arg),
+      '$': lambda: FileIO.prompt_show_matches(self.trie_processor, arg),
       '?': lambda: print(f"Restored keyword: '{self.text_processor.restore_word(arg, 'best')}'"),
-      '&': lambda: self._process_text_file('all'),
-      '@': lambda: self._process_text_file('best'),
+      '&': lambda: FileIO.prompt_process_text_file(self.text_processor, self.file_io, 'all'),
+      '@': lambda: FileIO.prompt_process_text_file(self.text_processor, self.file_io, 'best'),
       '!': self._print_text_restore_instructions,
       '\\': lambda: self._exit_restore_menu()
     }
@@ -177,7 +177,7 @@ class Application:
     """Print batch restore command instructions"""
     print("\n---------------------------------------------------------------")
     print("Batch Restore with Summary Commands:")
-    print("    'r','!','\\'")
+    print("    'r', '!', '\\'")
     print("---------------------------------------------------------------")
     print("     r      (Run batch restore on all .txt files in a folder)")
     print("     !      (Print instructions)")
@@ -241,7 +241,7 @@ class Application:
         if command == '!':
           self._print_random_word_challenge_instructions()
         elif command == '~':
-          self._load_keywords_from_file()
+          FileIO.prompt_load_keywords(self.trie_processor)
         elif command == '#':
           self.trie_processor.display_trie()
         elif command == '\\':
@@ -263,7 +263,7 @@ class Application:
     """Print instructions for Random Word Challenge"""
     print("\n---------------------------------------------------------------")
     print("Random Word Challenge Commands:")
-    print("    '~', '#', 'r','!','\\'")
+    print("    '~', '#', 'r', '!', '\\'")
     print("---------------------------------------------------------------")
     print("     ~       (Read keywords from file to make Trie)")
     print("     #       (Display Trie)")
@@ -295,7 +295,7 @@ class Application:
     """Print instructions for Context-Aware Restore"""
     print("\n---------------------------------------------------------------")
     print("Context-Aware Restore Commands:")
-    print("    '~','#','C','T','@','!','\\'")
+    print("    '~', '#', 'C', 'T', '@', '!', '\\'")
     print("---------------------------------------------------------------")
     print("  ~          (Read keywords from file to make Trie)")
     print("  #          (Display Trie)")
@@ -316,7 +316,7 @@ class Application:
     arg = command[1:].strip()
 
     commands = {
-      '~': self._load_keywords_from_file,
+    '~': lambda: FileIO.prompt_load_keywords(self.trie_processor),
       '#': lambda: self.trie_processor.display_trie(),
       'C': self._load_corpus_language_model,
       'T': lambda: self._set_context_threshold(arg),
@@ -412,7 +412,7 @@ class Application:
     """Print instructions for Fuzzy Repair panel"""
     print("\n---------------------------------------------------------------")
     print("Fuzzy Repair & OCR Confusables Commands:")
-    print("    '~','#','C','D','@','!','\\'")
+    print("    '~', '#', 'C', 'D', '@', '!', '\\'")
     print("---------------------------------------------------------------")
     print("  ~          (Read keywords from file to make Trie)")
     print("  #          (Display Trie)")
@@ -430,7 +430,7 @@ class Application:
     arg = command[1:].strip()
 
     commands = {
-      '~': self._load_keywords_from_file,
+    '~': lambda: FileIO.prompt_load_keywords(self.trie_processor),
       '#': lambda: self.trie_processor.display_trie(),
       'C': self._toggle_confusables,
       'D': lambda: self._set_fuzzy_maxdist(arg),
@@ -492,48 +492,9 @@ class Application:
     except Exception as e:
       print(f"Error running fuzzy repair: {e}")
 
-  # ===== Shared helpers =====
-  def _load_keywords_from_file(self):
-    """Load keywords from file into trie"""
-    filename = input("Please enter input file: ").strip()
-    result = self.file_io.load_keywords(filename, self.trie_processor)
-    print(result)
-
-  def _export_keywords_to_file(self):
-    """Export trie keywords to file"""
-    filename = input("Please enter output file: ").strip()
-    words = self.trie_processor.get_all_words()
-    result = self.file_io.export_keywords(filename, words)
-    print(result)
-
-  def _save_trie_to_file(self):
-    """Serialize trie to file"""
-    filename = input("Please enter new filename: ").strip()
-    result = self.file_io.save_trie(filename, self.trie_processor)
-    print(result)
-
-  def _show_matches(self, pattern):
-    """Display all matching keywords for pattern"""
-    matches = self.trie_processor.find_matches(pattern)
-    if matches:
-      formatted = [f"[{word},{freq}]" for word, freq in matches]
-      print(",".join(formatted))
-    else:
-      print()  # blank line
-
-  def _process_text_file(self, mode):
-    """Process text file restoration"""
-    input_file = input("Please enter input file: ").strip()
-    output_file = input("Please enter output file: ").strip()
-    try:
-      with open(input_file, 'r') as f:
-        content = f.read()
-      restored = self.text_processor.restore_text(content, mode)
-      result = self.file_io.restore_text_file(output_file, restored)
-      print(result)
-    except Exception as e:
-      print(f"Error processing files: {e}")
-
+# ===============================
+# ==== Main application loop ====
+# ===============================
   def run(self):
     """Main application loop"""
     self.display_header()
@@ -565,6 +526,9 @@ class Application:
         print(f"\nError: {str(e)}")
         input("Press Enter to continue...")
 
+# ===============================
+# Main application entry point
+# ===============================
 if __name__ == "__main__":
   # Start the application
   app = Application()
