@@ -34,17 +34,18 @@ class Application:
     print("\n\nPlease select your choice ('1', '2', '3', '4', '5', '6', '7'):")
     print("  1. Construct/Edit Trie")
     print("  2. Predict/Restore Text")
-    print("  3. Batch Restore with Summary (NEW)")
     print("  ---------------------------------------------------------------")
-    print("  4. Batch Restore with Summary (Andrew Pang)")
-    print("  5. Random Word Challenge: Gamified Testing (Andrew Pang)")
+    print("  3. Batch Restore with Summary (Andrew Pang)")
+    print("  4. Random Word Challenge: Gamified Testing (Andrew Pang)")
     print("  ---------------------------------------------------------------")
-    print("  6. Context-Aware Restore (Nyi Nyi Zaw)")
-    print("  7. Fuzzy Repair & OCR Confusables (Nyi Nyi Zaw)")
+    print("  5. Context-Aware Restore (Nyi Nyi Zaw)")
+    print("  6. Fuzzy Repair & OCR Confusables (Nyi Nyi Zaw)")
     print("  ---------------------------------------------------------------")
-    print("  8. Exit")
+    print("  7. Exit")
 
+  # =========================================
   # ===== Option 1: Construct/Edit Trie =====
+  # =========================================
   def trie_edit_menu(self):
     """Handle trie construction/edit menu"""
     self._print_trie_edit_instructions()
@@ -108,7 +109,9 @@ class Application:
     input("\nPress enter key, to continue....")
     return True
 
+  # ==========================================
   # ===== Option 2: Predict/Restore Text =====
+  # ==========================================
   def text_restore_menu(self):
     """Handle text prediction/restoration menu"""
     self._print_text_restore_instructions()
@@ -167,7 +170,9 @@ class Application:
     input("\nPress enter key, to continue....")
     return True
 
+  # ================================================
   # ===== Option 3: Batch Restore with Summary =====
+  # ================================================
   def _print_batch_restore_instructions(self):
     """Print batch restore command instructions"""
     print("\n---------------------------------------------------------------")
@@ -219,7 +224,57 @@ class Application:
         print(f"\nError: {str(e)}")
         input("\nPress Enter to continue...")
 
+  # ============================================
+  # ===== Option 4: Random World Challenge =====
+  # ============================================
+  def random_word_challenge_menu(self):
+    from processors.random_word_challenge import RandomWordChallenge
+    challenge = RandomWordChallenge(self.trie_processor)
+    print("\n--- Random Word Challenge ---")
+    print("Type 'r' to play, '~' to load keywords, '#' to display trie, '!' for instructions, or '\\' to exit.")
+    self._print_random_word_challenge_instructions()
+    while True:
+      try:
+        command = input("\n>").strip()
+        if not command:
+          continue
+        if command == '!':
+          self._print_random_word_challenge_instructions()
+        elif command == '~':
+          self._load_keywords_from_file()
+        elif command == '#':
+          self.trie_processor.display_trie()
+        elif command == '\\':
+          print("Exiting Random Word Challenge. Bye...")
+          input("\nPress Enter to continue...")
+          return
+        elif command == 'r':
+          challenge.play_round()
+        else:
+          print("Invalid command. Type '!', '~', '#', or 'r' to play.")
+      except KeyboardInterrupt:
+        print("\nOperation cancelled.")
+        return
+      except Exception as e:
+        print(f"\nError: {str(e)}")
+        input("\nPress Enter to continue...")
+  
+  def _print_random_word_challenge_instructions(self):
+    """Print instructions for Random Word Challenge"""
+    print("\n---------------------------------------------------------------")
+    print("Random Word Challenge Commands:")
+    print("    '~', '#', 'r','!','\\'")
+    print("---------------------------------------------------------------")
+    print("     ~       (Read keywords from file to make Trie)")
+    print("     #       (Display Trie)")
+    print("     r       (Run random word challenge)")
+    print("     !       (Print instructions)")
+    print("     \\       (Exit)")
+    print("---------------------------------------------------------------")
+    
+  # ===========================================        
   # ===== Option 5: Context-Aware Restore =====
+  # ===========================================        
   def context_restore_menu(self):
     """Command panel for Context-Aware Restore"""
     self._print_context_restore_instructions()
@@ -334,7 +389,9 @@ class Application:
     except Exception as e:
       print(f"Error running context restore: {e}")
 
+  # ====================================================
   # ===== Option 6: Fuzzy Repair & OCR Confusables =====
+  # ====================================================
   def fuzzy_repair_menu(self):
     """Command panel for Fuzzy Repair & OCR Confusables"""
     self._print_fuzzy_instructions()
@@ -493,84 +550,20 @@ class Application:
         elif choice == '4':
           self.random_word_challenge_menu()
         elif choice == '5':
-              from processors.random_word_challenge import RandomWordChallenge
-              challenge = RandomWordChallenge(self.trie_processor)
-              print("\n--- Random Word Challenge ---")
-              print("Type '!' for instructions, or '\\' to exit.")
-              self._print_random_word_challenge_instructions()
-              while True:
-                try:
-                  command = input("\n>").strip()
-                  if not command:
-                    continue
-                  if command == '!':
-                    self._print_random_word_challenge_instructions()
-                  elif command == '\\':
-                    print("Exiting Random Word Challenge. Bye...")
-                    input("\nPress Enter to continue...")
-                    return
-                  elif command == 'p':
-                    challenge.play_round()
-                  else:
-                    print("Invalid command. Type '!' for instructions or 'p' to play.")
-                except KeyboardInterrupt:
-                  print("\nOperation cancelled.")
-                  return
-                except Exception as e:
-                  print(f"\nError: {str(e)}")
-                  input("\nPress Enter to continue...")
-      try:
-        command = input("\n>").strip()
-        if not command:
-          continue
-        if command == '!':
-          self._print_random_word_challenge_instructions()
-        elif command == '\\':
-          print("Exiting Random Word Challenge. Bye...")
-          input("\nPress Enter to continue...")
-          return
-        elif command == 'p':
-          self._play_random_word_challenge()
+          self.context_restore_menu()
+        elif choice == '6':
+          self.fuzzy_repair_menu()
+        elif choice == '7':
+          self.running = False
+          print("\nExiting application. Goodbye!")
         else:
-          print("Invalid command. Type '!' for instructions or 'p' to play.")
+          print("\nInvalid choice. Please try again.")
+          input("Press Enter to continue...")
       except KeyboardInterrupt:
         print("\nOperation cancelled.")
-        return
       except Exception as e:
         print(f"\nError: {str(e)}")
-        input("\nPress Enter to continue...")
-
-  def _print_random_word_challenge_instructions(self):
-    print("\n---------------------------------------------------------------")
-    print("Random Word Challenge Commands:")
-    print("    'p','!','\\'")
-    print("---------------------------------------------------------------")
-    print("     p      (Play a random word guessing round)")
-    print("     !      (Print instructions)")
-    print("     \\      (Exit)")
-    print("---------------------------------------------------------------")
-
-  def _play_random_word_challenge(self):
-    # Get a random word from the trie
-    word = self.trie_processor.get_random_word()
-    if not word:
-      print("Trie is empty. Please add words first!")
-      return
-    # Hide random letters (at least 1, up to half the word)
-    import random
-    n = len(word)
-    if n < 3:
-      masked = '*' * n
-    else:
-      num_to_hide = max(1, n // 2)
-      indices = random.sample(range(n), num_to_hide)
-      masked = ''.join('*' if i in indices else c for i, c in enumerate(word))
-    print(f"Guess the word: {masked}")
-    guess = input("Your guess: ").strip().lower()
-    if guess == word:
-      print("Correct! Well done!")
-    else:
-      print(f"Incorrect. The word was: {word}")
+        input("Press Enter to continue...")
 
 if __name__ == "__main__":
   # Start the application
