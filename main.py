@@ -401,7 +401,7 @@ class Application:
         input("\nPress Enter to continue...")
 
   def _print_fuzzy_instructions(self):
-    """Print instructions for Fuzzy Repair panel"""
+    """Print instructions for Fuzzy Scan panel"""
     print("\n---------------------------------------------------------------")
     print("Fuzzy Scan & OCR Confusables Commands:")
     print("    '~', '#', 'C', 'D', '@', '!', '\\'")
@@ -417,7 +417,7 @@ class Application:
     print(f"Confusables: {'ON' if self._fuzzy_conf_on else 'OFF'} | MaxDist: {self._fuzzy_max_dist}")
 
   def _handle_fuzzy_command(self, command):
-    """Process commands in Fuzzy Repair panel"""
+    """Process commands in Fuzzy Scan panel"""
     cmd = command[0]
     arg = command[1:].strip()
 
@@ -434,7 +434,7 @@ class Application:
     return handler()
 
   def _exit_fuzzy_menu(self):
-    print("Exiting the Fuzzy Repair panel. Bye...")
+    print("Exiting the Fuzzy Scan panel. Bye...")
     input("\nPress enter key, to continue....")
     return True
 
