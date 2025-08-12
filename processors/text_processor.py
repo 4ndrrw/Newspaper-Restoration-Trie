@@ -89,23 +89,33 @@ class TextProcessor(BaseProcessor):
 
     for i, token in enumerate(tokens):
       if '*' in token:
+        # Score candidates using the language model and surrounding context
         left = prev_word(i)
         right = next_word(i)
         choice, conf = ctx_strategy.restore(token, self.trie, lm=lm, left_word=left, right_word=right)
-        restored_tokens.append(f"<{choice}>")
+
+        # Apply threshold: only replace if confidence >= threshold; otherwise keep original token
+        if conf >= threshold:
+          restored_tokens.append(f"<{choice}>")
+        else:
+          restored_tokens.append(token)
+
+        # Collect review information for CSV (always recorded, even if not replaced)
         matches = self.trie.find_matches(token)
         alts = [w for w, _ in matches]
         review_rows.append((token, choice, f"{conf:.3f}", left, (right or ''), ",".join(alts)))
       else:
+        # Keep tokens without wildcards unchanged
         restored_tokens.append(token)
 
+    # Reconstruct the text, preserving spacing/newlines and handling punctuation
     out = ''
-    for i, token in enumerate(restored_tokens):
-      if token == '\n':
-        out += token
-      elif i > 0 and restored_tokens[i - 1] != '\n' and not re.match(r"[.,!?;:\)\]\}]", token):
-        out += ' ' + token
+    for i, tok in enumerate(restored_tokens):
+      if tok == '\n':
+        out += tok
+      elif i > 0 and restored_tokens[i - 1] != '\n' and not re.match(r"[.,!?;:\)\]\}]", tok):
+        out += ' ' + tok
       else:
-        out += token
+        out += tok
 
     return out, review_rows
