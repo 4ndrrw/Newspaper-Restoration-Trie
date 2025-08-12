@@ -39,7 +39,7 @@ class Application:
     print("  4. Random Word Challenge: Gamified Testing (Andrew Pang)")
     print("  ---------------------------------------------------------------")
     print("  5. Context-Aware Restore (Nyi Nyi Zaw)")
-    print("  6. Fuzzy Repair & OCR Confusables (Nyi Nyi Zaw)")
+    print("  6. Fuzzy Scan & OCR Confusables (Nyi Nyi Zaw)")
     print("  ---------------------------------------------------------------")
     print("  7. Exit")
 
@@ -382,10 +382,10 @@ class Application:
       print(f"Error running context restore: {e}")
 
   # ====================================================
-  # ===== Option 6: Fuzzy Repair & OCR Confusables =====
+  # ===== Option 6: Fuzzy Scan & OCR Confusables =====
   # ====================================================
-  def fuzzy_repair_menu(self):
-    """Command panel for Fuzzy Repair & OCR Confusables"""
+  def fuzzy_scan_menu(self):
+    """Command panel for Fuzzy Scan & OCR Confusables"""
     self._print_fuzzy_instructions()
     while True:
       try:
@@ -403,7 +403,7 @@ class Application:
   def _print_fuzzy_instructions(self):
     """Print instructions for Fuzzy Repair panel"""
     print("\n---------------------------------------------------------------")
-    print("Fuzzy Repair & OCR Confusables Commands:")
+    print("Fuzzy Scan & OCR Confusables Commands:")
     print("    '~', '#', 'C', 'D', '@', '!', '\\'")
     print("---------------------------------------------------------------")
     print("  ~          (Read keywords from file to make Trie)")
@@ -462,7 +462,6 @@ class Application:
       from processors.fuzzy_search import TrieFuzzySearcher, default_confusables
       input_file = input("Please enter input file: ").strip()
       out_suggestions = input("Please enter output suggestions file: ").strip()
-      out_csv = input("Please enter output review CSV filename: ").strip()
 
       with open(input_file, 'r', encoding='utf-8') as f:
         raw = f.read()
@@ -475,12 +474,7 @@ class Application:
         for tok, suggs in suggestions:
           f.write(f"{tok} -> {suggs}\n")
 
-      with open(out_csv, 'w', encoding='utf-8') as f:
-        f.write('token,suggestions\n')
-        for tok, suggs in suggestions:
-          f.write(f"{tok},\"{'|'.join(suggs)}\"\n")
-
-      print(f"Fuzzy suggestions complete.\n- Suggestions: {out_suggestions}\n- Review: {out_csv}")
+      print(f"Fuzzy suggestions complete.")
     except Exception as e:
       print(f"Error running fuzzy repair: {e}")
 
@@ -505,7 +499,7 @@ class Application:
         elif choice == '5':
           self.context_restore_menu()
         elif choice == '6':
-          self.fuzzy_repair_menu()
+          self.fuzzy_scan_menu()
         elif choice == '7':
           self.running = False
           print("\nExiting application. Goodbye!")
