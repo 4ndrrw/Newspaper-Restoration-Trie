@@ -224,8 +224,6 @@ class Application:
   def random_word_challenge_menu(self):
     from processors.random_word_challenge import RandomWordChallenge
     challenge = RandomWordChallenge(self.trie_processor)
-    print("\n--- Random Word Challenge ---")
-    print("Type 'r' to play, '~' to load keywords, '#' to display trie, '!' for instructions, or '\\' to exit.")
     self._print_random_word_challenge_instructions()
     while True:
       try:
@@ -294,7 +292,7 @@ class Application:
     print("  ~          (Read keywords from file to make Trie)")
     print("  #          (Display Trie)")
     print("  C          (Load/Build corpus language model)")
-    print("  T0.75      (Set confidence threshold)")
+    print("  T          (Set confidence threshold)")
     print("  @          (Restore a text with context)")
     print("  !          (Print instructions)")
     print("  \\          (Exit)")
