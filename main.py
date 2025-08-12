@@ -12,7 +12,7 @@ class Application:
     self.batch_restorer = BatchRestorer(self.text_processor, self.file_io)
     self.running = True
 
-    # NEW: state for Option 5 (context) and Option 6 (fuzzy)
+    # state for Option 5 (context) and Option 6 (fuzzy)
     self._lm = None                 # language model for Option 5
     self._ctx_threshold = 0.6       # confidence threshold for Option 5
     self._fuzzy_conf_on = True      # confusables toggle for Option 6
